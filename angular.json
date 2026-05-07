@@ -1,0 +1,94 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "cli": {
+    "packageManager": "npm",
+    "analytics": "8ba02c32-8b7d-4212-8789-79492670ed0f"
+  },
+  "newProjectRoot": "projects",
+  "projects": {
+    "mftrade": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss",
+          "standalone": false
+        },
+        "@schematics/angular:directive": {
+          "standalone": false
+        },
+        "@schematics/angular:pipe": {
+          "standalone": false
+        }
+      },
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "src/main.ts",
+            "tsConfig": "tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              }
+            ],
+            "styles": [
+              "src/styles.scss"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "fileReplacements": [{ "replace": "src/environments/environment.ts", "with": "src/environments/environment.prod.ts" }],
+              "budgets": [
+                { "type": "initial", "maximumWarning": "500kB", "maximumError": "1MB" },
+                { "type": "anyComponentStyle", "maximumWarning": "4kB", "maximumError": "8kB" }
+              ],
+              "outputHashing": "all"
+            },
+            "sit": {
+              "fileReplacements": [{ "replace": "src/environments/environment.ts", "with": "src/environments/environment.sit.ts" }],
+              "optimization": false,
+              "sourceMap": true
+            },
+            "stage": {
+              "fileReplacements": [{ "replace": "src/environments/environment.ts", "with": "src/environments/environment.stage.ts" }],
+              "optimization": true,
+              "sourceMap": false
+            },
+            "pat": {
+              "fileReplacements": [{ "replace": "src/environments/environment.ts", "with": "src/environments/environment.pat.ts" }],
+              "optimization": true,
+              "sourceMap": false
+            },
+            "development": {
+              "fileReplacements": [],
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": { "buildTarget": "mftrade:build:production" },
+            "sit":        { "buildTarget": "mftrade:build:sit" },
+            "stage":      { "buildTarget": "mftrade:build:stage" },
+            "pat":        { "buildTarget": "mftrade:build:pat" },
+            "development": { "buildTarget": "mftrade:build:development" }
+          },
+          "defaultConfiguration": "development"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test"
+        }
+      }
+    }
+  }
+}

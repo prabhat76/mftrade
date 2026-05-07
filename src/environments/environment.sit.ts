@@ -1,0 +1,16 @@
+export const environment = {
+  name: 'sit',
+  production: false,
+  useMocks: false,
+  apiBase: 'https://sit-api.mftrade.internal',
+  mfApiBase: 'https://api.mfapi.in',
+  nseApiBase: 'https://www.nseindia.com/api',
+  nismApiBase: 'https://www.nism.ac.in',
+  mcxGoldApi: 'https://priceapi.mcxindia.com/MarketData/GetContractDetails',
+  authApi: 'https://sit-api.mftrade.internal/auth',
+  portfolioApi: 'https://sit-api.mftrade.internal/portfolio',
+  orderApi: 'https://sit-api.mftrade.internal/orders',
+  watchlistApi: 'https://sit-api.mftrade.internal/watchlist',
+  refreshInterval: 30000,
+  logLevel: 'info',
+};

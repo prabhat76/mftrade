@@ -1,0 +1,9 @@
+{
+  "buildCommand": "npm run build:dev",
+  "outputDirectory": "dist/mftrade/browser",
+  "installCommand": "npm ci",
+  "framework": null,
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

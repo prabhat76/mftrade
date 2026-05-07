@@ -1,0 +1,16 @@
+export const environment = {
+  name: 'pat',
+  production: false,
+  useMocks: false,
+  apiBase: 'https://pat-api.mftrade.internal',
+  mfApiBase: 'https://api.mfapi.in',
+  nseApiBase: 'https://www.nseindia.com/api',
+  nismApiBase: 'https://www.nism.ac.in',
+  mcxGoldApi: 'https://priceapi.mcxindia.com/MarketData/GetContractDetails',
+  authApi: 'https://pat-api.mftrade.internal/auth',
+  portfolioApi: 'https://pat-api.mftrade.internal/portfolio',
+  orderApi: 'https://pat-api.mftrade.internal/orders',
+  watchlistApi: 'https://pat-api.mftrade.internal/watchlist',
+  refreshInterval: 15000,
+  logLevel: 'warn',
+};

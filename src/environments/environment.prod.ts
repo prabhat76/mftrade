@@ -1,0 +1,16 @@
+export const environment = {
+  name: 'production',
+  production: true,
+  useMocks: false,
+  apiBase: 'https://api.mftrade.com',
+  mfApiBase: 'https://api.mfapi.in',
+  nseApiBase: 'https://www.nseindia.com/api',
+  nismApiBase: 'https://www.nism.ac.in',
+  mcxGoldApi: 'https://priceapi.mcxindia.com/MarketData/GetContractDetails',
+  authApi: 'https://api.mftrade.com/auth',
+  portfolioApi: 'https://api.mftrade.com/portfolio',
+  orderApi: 'https://api.mftrade.com/orders',
+  watchlistApi: 'https://api.mftrade.com/watchlist',
+  refreshInterval: 10000,
+  logLevel: 'error',
+};

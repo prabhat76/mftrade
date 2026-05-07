@@ -1,0 +1,6 @@
+src/
+.angular/
+.github/
+.vercel-envs/
+node_modules/
+*.md
