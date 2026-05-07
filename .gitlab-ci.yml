@@ -1,0 +1,160 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  NODE_VERSION: "20"
+
+# ── Cache node_modules across jobs ───────────────────────────────────────────
+.node_cache: &node_cache
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - node_modules/
+
+# ── Reusable build template ───────────────────────────────────────────────────
+.build_template: &build_template
+  stage: build
+  image: node:20-alpine
+  <<: *node_cache
+  before_script:
+    - npm ci
+  artifacts:
+    paths:
+      - dist/mftrade/browser
+    expire_in: 1 hour
+
+# ── Reusable deploy template ──────────────────────────────────────────────────
+.deploy_template: &deploy_template
+  stage: deploy
+  image: node:20-alpine
+  before_script:
+    - npm install -g vercel
+
+# ═════════════════════════════════════════════════════════════════════════════
+# DEV  (branch: develop)
+# ═════════════════════════════════════════════════════════════════════════════
+build:dev:
+  <<: *build_template
+  script:
+    - npm run build:dev
+  only:
+    - develop
+
+deploy:dev:
+  <<: *deploy_template
+  script:
+    - vercel deploy dist/mftrade/browser --yes --token=$VERCEL_TOKEN
+  environment:
+    name: dev
+    url: https://mftrade-dev.vercel.app
+  variables:
+    VERCEL_PROJECT_ID: $VERCEL_PROJECT_ID_DEV
+    VERCEL_ORG_ID: $VERCEL_ORG_ID
+  needs:
+    - build:dev
+  only:
+    - develop
+
+# ═════════════════════════════════════════════════════════════════════════════
+# SIT  (branch: sit)
+# ═════════════════════════════════════════════════════════════════════════════
+build:sit:
+  <<: *build_template
+  script:
+    - npm run build:sit
+  only:
+    - sit
+
+deploy:sit:
+  <<: *deploy_template
+  script:
+    - vercel deploy dist/mftrade/browser --yes --token=$VERCEL_TOKEN
+  environment:
+    name: sit
+    url: https://mftrade-sit.vercel.app
+  variables:
+    VERCEL_PROJECT_ID: $VERCEL_PROJECT_ID_SIT
+    VERCEL_ORG_ID: $VERCEL_ORG_ID
+  needs:
+    - build:sit
+  only:
+    - sit
+
+# ═════════════════════════════════════════════════════════════════════════════
+# STAGE  (branch: staging)
+# ═════════════════════════════════════════════════════════════════════════════
+build:stage:
+  <<: *build_template
+  script:
+    - npm run build:stage
+  only:
+    - staging
+
+deploy:stage:
+  <<: *deploy_template
+  script:
+    - vercel deploy dist/mftrade/browser --yes --token=$VERCEL_TOKEN
+  environment:
+    name: stage
+    url: https://mftrade-stage.vercel.app
+  variables:
+    VERCEL_PROJECT_ID: $VERCEL_PROJECT_ID_STAGE
+    VERCEL_ORG_ID: $VERCEL_ORG_ID
+  needs:
+    - build:stage
+  only:
+    - staging
+
+# ═════════════════════════════════════════════════════════════════════════════
+# PAT  (branch: pat)
+# ═════════════════════════════════════════════════════════════════════════════
+build:pat:
+  <<: *build_template
+  script:
+    - npm run build:pat
+  only:
+    - pat
+
+deploy:pat:
+  <<: *deploy_template
+  script:
+    - vercel deploy dist/mftrade/browser --yes --token=$VERCEL_TOKEN
+  environment:
+    name: pat
+    url: https://mftrade-pat.vercel.app
+  variables:
+    VERCEL_PROJECT_ID: $VERCEL_PROJECT_ID_PAT
+    VERCEL_ORG_ID: $VERCEL_ORG_ID
+  needs:
+    - build:pat
+  only:
+    - pat
+
+# ═════════════════════════════════════════════════════════════════════════════
+# PRODUCTION  (branch: main)
+# ═════════════════════════════════════════════════════════════════════════════
+build:prod:
+  <<: *build_template
+  script:
+    - npm run build:prod
+  only:
+    - main
+
+deploy:prod:
+  <<: *deploy_template
+  script:
+    - vercel deploy dist/mftrade/browser --prod --yes --token=$VERCEL_TOKEN
+  environment:
+    name: production
+    url: https://mftrade-prod.vercel.app
+  variables:
+    VERCEL_PROJECT_ID: $VERCEL_PROJECT_ID_PROD
+    VERCEL_ORG_ID: $VERCEL_ORG_ID
+  needs:
+    - build:prod
+  only:
+    - main
+  when: manual
