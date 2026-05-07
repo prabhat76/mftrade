@@ -3,11 +3,11 @@ name: Deploy to Vercel
 on:
   push:
     branches:
-      - develop   # auto deploy
-      - sit       # manual deploy after CR
-      - staging   # manual deploy after CR
-      - pat       # manual deploy after CR
-      - main      # manual deploy after CR
+      - develop
+      - sit
+      - staging
+      - pat
+      - main
 
 jobs:
   deploy:
@@ -29,67 +29,85 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
 
-      # ── DEV ────────────────────────────────────────────────────────────────
+      # Debug — confirms secrets are reaching the runner (values stay masked)
+      - name: Debug secret presence
+        run: |
+          echo "VERCEL_TOKEN is set: ${{ secrets.VERCEL_TOKEN != '' }}"
+          echo "VERCEL_ORG_ID is set: ${{ secrets.VERCEL_ORG_ID != '' }}"
+          echo "Branch: ${{ github.ref_name }}"
+
+      # Write token to vercel global config so CLI picks it up automatically
+      - name: Configure Vercel credentials
+        run: |
+          mkdir -p ~/.local/share/com.vercel.cli
+          echo '{"token":"${{ secrets.VERCEL_TOKEN }}"}' > ~/.local/share/com.vercel.cli/auth.json
+
+      # ── DEV ──────────────────────────────────────────────────────────────
       - name: Build [dev]
         if: github.ref_name == 'develop'
         run: npm run build:dev
 
       - name: Deploy [dev]
         if: github.ref_name == 'develop'
+        run: |
+          vercel deploy dist/mftrade/browser --yes \
+            --token=${{ secrets.VERCEL_TOKEN }}
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_DEV }}
-        run: vercel deploy dist/mftrade/browser --token=$VERCEL_TOKEN --yes
 
-      # ── SIT ────────────────────────────────────────────────────────────────
+      # ── SIT ──────────────────────────────────────────────────────────────
       - name: Build [sit]
         if: github.ref_name == 'sit'
         run: npm run build:sit
 
       - name: Deploy [sit]
         if: github.ref_name == 'sit'
+        run: |
+          vercel deploy dist/mftrade/browser --yes \
+            --token=${{ secrets.VERCEL_TOKEN }}
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_SIT }}
-        run: vercel deploy dist/mftrade/browser --token=$VERCEL_TOKEN --yes
 
-      # ── STAGE ──────────────────────────────────────────────────────────────
+      # ── STAGE ────────────────────────────────────────────────────────────
       - name: Build [stage]
         if: github.ref_name == 'staging'
         run: npm run build:stage
 
       - name: Deploy [stage]
         if: github.ref_name == 'staging'
+        run: |
+          vercel deploy dist/mftrade/browser --yes \
+            --token=${{ secrets.VERCEL_TOKEN }}
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_STAGE }}
-        run: vercel deploy dist/mftrade/browser --token=$VERCEL_TOKEN --yes
 
-      # ── PAT ────────────────────────────────────────────────────────────────
+      # ── PAT ──────────────────────────────────────────────────────────────
       - name: Build [pat]
         if: github.ref_name == 'pat'
         run: npm run build:pat
 
       - name: Deploy [pat]
         if: github.ref_name == 'pat'
+        run: |
+          vercel deploy dist/mftrade/browser --yes \
+            --token=${{ secrets.VERCEL_TOKEN }}
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_PAT }}
-        run: vercel deploy dist/mftrade/browser --token=$VERCEL_TOKEN --yes
 
-      # ── PRODUCTION ─────────────────────────────────────────────────────────
+      # ── PRODUCTION ───────────────────────────────────────────────────────
       - name: Build [prod]
         if: github.ref_name == 'main'
         run: npm run build:prod
 
       - name: Deploy [prod]
         if: github.ref_name == 'main'
+        run: |
+          vercel deploy dist/mftrade/browser --prod --yes \
+            --token=${{ secrets.VERCEL_TOKEN }}
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_PROD }}
-        run: vercel deploy dist/mftrade/browser --token=$VERCEL_TOKEN --prod --yes
