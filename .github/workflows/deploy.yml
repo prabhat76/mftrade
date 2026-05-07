@@ -49,9 +49,7 @@ jobs:
 
       - name: Deploy [dev]
         if: github.ref_name == 'develop'
-        run: |
-          vercel deploy dist/mftrade/browser --yes \
-            --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel deploy dist/mftrade/browser --yes --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_DEV }}
@@ -63,9 +61,7 @@ jobs:
 
       - name: Deploy [sit]
         if: github.ref_name == 'sit'
-        run: |
-          vercel deploy dist/mftrade/browser --yes \
-            --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel deploy dist/mftrade/browser --yes --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_SIT }}
@@ -77,9 +73,7 @@ jobs:
 
       - name: Deploy [stage]
         if: github.ref_name == 'staging'
-        run: |
-          vercel deploy dist/mftrade/browser --yes \
-            --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel deploy dist/mftrade/browser --yes --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_STAGE }}
@@ -91,9 +85,7 @@ jobs:
 
       - name: Deploy [pat]
         if: github.ref_name == 'pat'
-        run: |
-          vercel deploy dist/mftrade/browser --yes \
-            --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel deploy dist/mftrade/browser --yes --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_PAT }}
@@ -105,9 +97,7 @@ jobs:
 
       - name: Deploy [prod]
         if: github.ref_name == 'main'
-        run: |
-          vercel deploy dist/mftrade/browser --prod --yes \
-            --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel deploy dist/mftrade/browser --prod --yes --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_PROD }}
