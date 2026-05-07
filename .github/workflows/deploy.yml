@@ -97,7 +97,7 @@ jobs:
           printf '{"projectId":"%s","orgId":"%s"}' \
             "$PROJ_ID" "$ORG_ID" > .vercel/project.json
           npm run build:prod
-          vercel build --token="$VERCEL_TOKEN" --yes
+          vercel build --prod --token="$VERCEL_TOKEN" --yes
           vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN" --yes
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
