@@ -3,39 +3,43 @@ name: Deploy to Vercel
 on:
   push:
     branches:
-      - develop
-      - sit
-      - staging
-      - pat
-      - main
+      - develop   # auto build + auto deploy
+
+  # Manual trigger for all other envs
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        type: choice
+        options:
+          - sit
+          - staging
+          - pat
+          - production
 
 jobs:
-  deploy:
+  # ═══════════════════════════════════════════════════════
+  # AUTO — develop only, no manual step needed
+  # ═══════════════════════════════════════════════════════
+  deploy-dev:
+    if: github.event_name == 'push' && github.ref_name == 'develop'
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node 20
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
-      - name: Install dependencies
-        run: npm ci
+      - run: npm ci
+      - run: npm install -g vercel@latest
 
-      - name: Install Vercel CLI
-        run: npm install -g vercel@latest
-
-      # ── DEV ──────────────────────────────────────────────────────────────
       - name: Build + Deploy [dev]
-        if: github.ref_name == 'develop'
         run: |
           mkdir -p .vercel
-          printf '{"projectId":"%s","orgId":"%s"}' \
-            "$PROJ_ID" "$ORG_ID" > .vercel/project.json
+          printf '{"projectId":"%s","orgId":"%s"}' "$PROJ_ID" "$ORG_ID" > .vercel/project.json
           npm run build:dev
           vercel build --token="$VERCEL_TOKEN" --yes
           vercel deploy --prebuilt --token="$VERCEL_TOKEN" --yes
@@ -44,13 +48,32 @@ jobs:
           ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           PROJ_ID: ${{ secrets.VERCEL_PROJECT_ID_DEV }}
 
-      # ── SIT ──────────────────────────────────────────────────────────────
+  # ═══════════════════════════════════════════════════════
+  # MANUAL — triggered via workflow_dispatch only
+  # Go to Actions → Deploy to Vercel → Run workflow
+  # Pick environment from dropdown
+  # ═══════════════════════════════════════════════════════
+  deploy-manual:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.environment == 'production' && 'main' || github.event.inputs.environment == 'staging' && 'staging' || github.event.inputs.environment }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm install -g vercel@latest
+
       - name: Build + Deploy [sit]
-        if: github.ref_name == 'sit'
+        if: github.event.inputs.environment == 'sit'
         run: |
           mkdir -p .vercel
-          printf '{"projectId":"%s","orgId":"%s"}' \
-            "$PROJ_ID" "$ORG_ID" > .vercel/project.json
+          printf '{"projectId":"%s","orgId":"%s"}' "$PROJ_ID" "$ORG_ID" > .vercel/project.json
           npm run build:sit
           vercel build --token="$VERCEL_TOKEN" --yes
           vercel deploy --prebuilt --token="$VERCEL_TOKEN" --yes
@@ -59,13 +82,11 @@ jobs:
           ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           PROJ_ID: ${{ secrets.VERCEL_PROJECT_ID_SIT }}
 
-      # ── STAGE ────────────────────────────────────────────────────────────
       - name: Build + Deploy [stage]
-        if: github.ref_name == 'staging'
+        if: github.event.inputs.environment == 'staging'
         run: |
           mkdir -p .vercel
-          printf '{"projectId":"%s","orgId":"%s"}' \
-            "$PROJ_ID" "$ORG_ID" > .vercel/project.json
+          printf '{"projectId":"%s","orgId":"%s"}' "$PROJ_ID" "$ORG_ID" > .vercel/project.json
           npm run build:stage
           vercel build --token="$VERCEL_TOKEN" --yes
           vercel deploy --prebuilt --token="$VERCEL_TOKEN" --yes
@@ -74,13 +95,11 @@ jobs:
           ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           PROJ_ID: ${{ secrets.VERCEL_PROJECT_ID_STAGE }}
 
-      # ── PAT ──────────────────────────────────────────────────────────────
       - name: Build + Deploy [pat]
-        if: github.ref_name == 'pat'
+        if: github.event.inputs.environment == 'pat'
         run: |
           mkdir -p .vercel
-          printf '{"projectId":"%s","orgId":"%s"}' \
-            "$PROJ_ID" "$ORG_ID" > .vercel/project.json
+          printf '{"projectId":"%s","orgId":"%s"}' "$PROJ_ID" "$ORG_ID" > .vercel/project.json
           npm run build:pat
           vercel build --token="$VERCEL_TOKEN" --yes
           vercel deploy --prebuilt --token="$VERCEL_TOKEN" --yes
@@ -89,13 +108,11 @@ jobs:
           ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           PROJ_ID: ${{ secrets.VERCEL_PROJECT_ID_PAT }}
 
-      # ── PRODUCTION ───────────────────────────────────────────────────────
       - name: Build + Deploy [prod]
-        if: github.ref_name == 'main'
+        if: github.event.inputs.environment == 'production'
         run: |
           mkdir -p .vercel
-          printf '{"projectId":"%s","orgId":"%s"}' \
-            "$PROJ_ID" "$ORG_ID" > .vercel/project.json
+          printf '{"projectId":"%s","orgId":"%s"}' "$PROJ_ID" "$ORG_ID" > .vercel/project.json
           npm run build:prod
           vercel build --prod --token="$VERCEL_TOKEN" --yes
           vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN" --yes
