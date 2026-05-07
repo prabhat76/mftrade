@@ -3,11 +3,11 @@ name: Deploy to Vercel
 on:
   push:
     branches:
-      - main       # → production  → mftrade.vercel.app
-      - develop    # → dev         → mftrade-dev.vercel.app
-      - sit        # → sit         → mftrade-sit.vercel.app
-      - staging    # → stage       → mftrade-stage.vercel.app
-      - pat        # → pat         → mftrade-pat.vercel.app
+      - develop    # auto deploy
+      - sit        # requires PR/CR merged
+      - staging    # requires PR/CR merged
+      - pat        # requires PR/CR merged
+      - main       # requires PR/CR merged + manual approval
 
 jobs:
   deploy:
@@ -22,34 +22,34 @@ jobs:
         run: |
           case "${{ github.ref_name }}" in
             main)
-              echo "build=build:prod"                              >> $GITHUB_OUTPUT
-              echo "project_id=${{ secrets.VERCEL_PROJECT_ID_PROD }}" >> $GITHUB_OUTPUT
-              echo "env_name=production"                          >> $GITHUB_OUTPUT
-              echo "is_prod=true"                                 >> $GITHUB_OUTPUT
+              echo "build=build:prod"                                        >> $GITHUB_OUTPUT
+              echo "project_id=${{ secrets.VERCEL_PROJECT_ID_PROD }}"       >> $GITHUB_OUTPUT
+              echo "env_name=production"                                     >> $GITHUB_OUTPUT
+              echo "is_prod=true"                                            >> $GITHUB_OUTPUT
               ;;
             develop)
-              echo "build=build:dev"                              >> $GITHUB_OUTPUT
-              echo "project_id=${{ secrets.VERCEL_PROJECT_ID_DEV }}"  >> $GITHUB_OUTPUT
-              echo "env_name=dev"                                 >> $GITHUB_OUTPUT
-              echo "is_prod=false"                                >> $GITHUB_OUTPUT
+              echo "build=build:dev"                                         >> $GITHUB_OUTPUT
+              echo "project_id=${{ secrets.VERCEL_PROJECT_ID_DEV }}"        >> $GITHUB_OUTPUT
+              echo "env_name=dev"                                            >> $GITHUB_OUTPUT
+              echo "is_prod=false"                                           >> $GITHUB_OUTPUT
               ;;
             sit)
-              echo "build=build:sit"                              >> $GITHUB_OUTPUT
-              echo "project_id=${{ secrets.VERCEL_PROJECT_ID_SIT }}"  >> $GITHUB_OUTPUT
-              echo "env_name=sit"                                 >> $GITHUB_OUTPUT
-              echo "is_prod=false"                                >> $GITHUB_OUTPUT
+              echo "build=build:sit"                                         >> $GITHUB_OUTPUT
+              echo "project_id=${{ secrets.VERCEL_PROJECT_ID_SIT }}"        >> $GITHUB_OUTPUT
+              echo "env_name=sit"                                            >> $GITHUB_OUTPUT
+              echo "is_prod=false"                                           >> $GITHUB_OUTPUT
               ;;
             staging)
-              echo "build=build:stage"                            >> $GITHUB_OUTPUT
-              echo "project_id=${{ secrets.VERCEL_PROJECT_ID_STAGE }}" >> $GITHUB_OUTPUT
-              echo "env_name=stage"                               >> $GITHUB_OUTPUT
-              echo "is_prod=false"                                >> $GITHUB_OUTPUT
+              echo "build=build:stage"                                       >> $GITHUB_OUTPUT
+              echo "project_id=${{ secrets.VERCEL_PROJECT_ID_STAGE }}"      >> $GITHUB_OUTPUT
+              echo "env_name=stage"                                          >> $GITHUB_OUTPUT
+              echo "is_prod=false"                                           >> $GITHUB_OUTPUT
               ;;
             pat)
-              echo "build=build:pat"                              >> $GITHUB_OUTPUT
-              echo "project_id=${{ secrets.VERCEL_PROJECT_ID_PAT }}"  >> $GITHUB_OUTPUT
-              echo "env_name=pat"                                 >> $GITHUB_OUTPUT
-              echo "is_prod=false"                                >> $GITHUB_OUTPUT
+              echo "build=build:pat"                                         >> $GITHUB_OUTPUT
+              echo "project_id=${{ secrets.VERCEL_PROJECT_ID_PAT }}"        >> $GITHUB_OUTPUT
+              echo "env_name=pat"                                            >> $GITHUB_OUTPUT
+              echo "is_prod=false"                                           >> $GITHUB_OUTPUT
               ;;
           esac
 
@@ -65,22 +65,18 @@ jobs:
       - name: Build → ${{ steps.cfg.outputs.env_name }}
         run: npm run ${{ steps.cfg.outputs.build }}
 
-      # Production deploy (--prod promotes to the live alias)
-      - name: Deploy to Vercel [PRODUCTION]
-        if: steps.cfg.outputs.is_prod == 'true'
-        run: |
-          npx vercel deploy dist/mftrade/browser --prod --yes \
-            --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_PROJECT_ID: ${{ steps.cfg.outputs.project_id }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-
-      # Non-production deploy (preview URL, no --prod flag)
-      - name: Deploy to Vercel [${{ steps.cfg.outputs.env_name }}]
+      - name: Deploy preview (non-prod)
         if: steps.cfg.outputs.is_prod == 'false'
-        run: |
-          npx vercel deploy dist/mftrade/browser --yes \
-            --token=${{ secrets.VERCEL_TOKEN }}
         env:
-          VERCEL_PROJECT_ID: ${{ steps.cfg.outputs.project_id }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ steps.cfg.outputs.project_id }}
+        run: vercel deploy dist/mftrade/browser --token=${{ secrets.VERCEL_TOKEN }} --yes
+
+      - name: Deploy production
+        if: steps.cfg.outputs.is_prod == 'true'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ steps.cfg.outputs.project_id }}
+        run: vercel deploy dist/mftrade/browser --token=${{ secrets.VERCEL_TOKEN }} --prod --yes

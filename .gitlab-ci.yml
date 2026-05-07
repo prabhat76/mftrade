@@ -27,9 +27,9 @@ stages:
   before_script:
     - npm install -g vercel@latest
 
-# ═══════════════════════════════════════════════
-# DEV  →  develop branch
-# ═══════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════
+# DEV — auto deploys on every push to develop
+# ═══════════════════════════════════════════════════════════════
 build:dev:
   <<: *build_template
   script:
@@ -40,8 +40,8 @@ build:dev:
 deploy:dev:
   <<: *deploy_template
   script:
-    - export VERCEL_PROJECT_ID=$VERCEL_PROJECT_ID_DEV
     - export VERCEL_ORG_ID=$VERCEL_ORG_ID
+    - export VERCEL_PROJECT_ID=$VERCEL_PROJECT_ID_DEV
     - vercel deploy dist/mftrade/browser --token=$VERCEL_TOKEN --yes
   environment:
     name: dev
@@ -49,96 +49,125 @@ deploy:dev:
   needs: [build:dev]
   only:
     - develop
+  # No when: manual → runs automatically
 
-# ═══════════════════════════════════════════════
-# SIT  →  sit branch
-# ═══════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════
+# SIT — only triggers when a MR is merged into sit branch
+#       deploy step requires manual click (CR approval gate)
+# ═══════════════════════════════════════════════════════════════
 build:sit:
   <<: *build_template
   script:
     - npm run build:sit
   only:
-    - sit
+    refs:
+      - sit
+    variables:
+      - $CI_PIPELINE_SOURCE == "push"
 
 deploy:sit:
   <<: *deploy_template
   script:
-    - export VERCEL_PROJECT_ID=$VERCEL_PROJECT_ID_SIT
     - export VERCEL_ORG_ID=$VERCEL_ORG_ID
+    - export VERCEL_PROJECT_ID=$VERCEL_PROJECT_ID_SIT
     - vercel deploy dist/mftrade/browser --token=$VERCEL_TOKEN --yes
   environment:
     name: sit
     url: https://mftrade-sit.vercel.app
   needs: [build:sit]
   only:
-    - sit
+    refs:
+      - sit
+    variables:
+      - $CI_PIPELINE_SOURCE == "push"
+  when: manual   # ← must click Deploy in GitLab after CR is merged
 
-# ═══════════════════════════════════════════════
-# STAGE  →  staging branch
-# ═══════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════
+# STAGE — MR into staging + manual deploy click
+# ═══════════════════════════════════════════════════════════════
 build:stage:
   <<: *build_template
   script:
     - npm run build:stage
   only:
-    - staging
+    refs:
+      - staging
+    variables:
+      - $CI_PIPELINE_SOURCE == "push"
 
 deploy:stage:
   <<: *deploy_template
   script:
-    - export VERCEL_PROJECT_ID=$VERCEL_PROJECT_ID_STAGE
     - export VERCEL_ORG_ID=$VERCEL_ORG_ID
+    - export VERCEL_PROJECT_ID=$VERCEL_PROJECT_ID_STAGE
     - vercel deploy dist/mftrade/browser --token=$VERCEL_TOKEN --yes
   environment:
     name: stage
     url: https://mftrade-stage.vercel.app
   needs: [build:stage]
   only:
-    - staging
+    refs:
+      - staging
+    variables:
+      - $CI_PIPELINE_SOURCE == "push"
+  when: manual
 
-# ═══════════════════════════════════════════════
-# PAT  →  pat branch
-# ═══════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════
+# PAT — MR into pat + manual deploy click
+# ═══════════════════════════════════════════════════════════════
 build:pat:
   <<: *build_template
   script:
     - npm run build:pat
   only:
-    - pat
+    refs:
+      - pat
+    variables:
+      - $CI_PIPELINE_SOURCE == "push"
 
 deploy:pat:
   <<: *deploy_template
   script:
-    - export VERCEL_PROJECT_ID=$VERCEL_PROJECT_ID_PAT
     - export VERCEL_ORG_ID=$VERCEL_ORG_ID
+    - export VERCEL_PROJECT_ID=$VERCEL_PROJECT_ID_PAT
     - vercel deploy dist/mftrade/browser --token=$VERCEL_TOKEN --yes
   environment:
     name: pat
     url: https://mftrade-pat.vercel.app
   needs: [build:pat]
   only:
-    - pat
+    refs:
+      - pat
+    variables:
+      - $CI_PIPELINE_SOURCE == "push"
+  when: manual
 
-# ═══════════════════════════════════════════════
-# PRODUCTION  →  main branch  (manual gate)
-# ═══════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════
+# PRODUCTION — MR into main + manual deploy click
+# ═══════════════════════════════════════════════════════════════
 build:prod:
   <<: *build_template
   script:
     - npm run build:prod
   only:
-    - main
+    refs:
+      - main
+    variables:
+      - $CI_PIPELINE_SOURCE == "push"
 
 deploy:prod:
   <<: *deploy_template
   script:
-    - export VERCEL_PROJECT_ID=$VERCEL_PROJECT_ID_PROD
     - export VERCEL_ORG_ID=$VERCEL_ORG_ID
+    - export VERCEL_PROJECT_ID=$VERCEL_PROJECT_ID_PROD
     - vercel deploy dist/mftrade/browser --token=$VERCEL_TOKEN --prod --yes
   environment:
     name: production
     url: https://mftrade-prod.vercel.app
   needs: [build:prod]
   only:
-    - main
+    refs:
+      - main
+    variables:
+      - $CI_PIPELINE_SOURCE == "push"
   when: manual
