@@ -30,16 +30,12 @@ jobs:
         run: npm install -g vercel@latest
 
       # ── DEV ──────────────────────────────────────────────────────────────
-      - name: Build [dev]
-        if: github.ref_name == 'develop'
-        run: npm run build:dev
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_DEV }}
-
-      - name: Deploy [dev]
+      - name: Build + Deploy [dev]
         if: github.ref_name == 'develop'
         run: |
+          mkdir -p .vercel
+          echo '{"projectId":"${{ secrets.VERCEL_PROJECT_ID_DEV }}","orgId":"${{ secrets.VERCEL_ORG_ID }}"}' > .vercel/project.json
+          npm run build:dev
           vercel build --token=${{ secrets.VERCEL_TOKEN }} --yes
           vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --yes
         env:
@@ -47,16 +43,12 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_DEV }}
 
       # ── SIT ──────────────────────────────────────────────────────────────
-      - name: Build [sit]
-        if: github.ref_name == 'sit'
-        run: npm run build:sit
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_SIT }}
-
-      - name: Deploy [sit]
+      - name: Build + Deploy [sit]
         if: github.ref_name == 'sit'
         run: |
+          mkdir -p .vercel
+          echo '{"projectId":"${{ secrets.VERCEL_PROJECT_ID_SIT }}","orgId":"${{ secrets.VERCEL_ORG_ID }}"}' > .vercel/project.json
+          npm run build:sit
           vercel build --token=${{ secrets.VERCEL_TOKEN }} --yes
           vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --yes
         env:
@@ -64,16 +56,12 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_SIT }}
 
       # ── STAGE ────────────────────────────────────────────────────────────
-      - name: Build [stage]
-        if: github.ref_name == 'staging'
-        run: npm run build:stage
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_STAGE }}
-
-      - name: Deploy [stage]
+      - name: Build + Deploy [stage]
         if: github.ref_name == 'staging'
         run: |
+          mkdir -p .vercel
+          echo '{"projectId":"${{ secrets.VERCEL_PROJECT_ID_STAGE }}","orgId":"${{ secrets.VERCEL_ORG_ID }}"}' > .vercel/project.json
+          npm run build:stage
           vercel build --token=${{ secrets.VERCEL_TOKEN }} --yes
           vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --yes
         env:
@@ -81,16 +69,12 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_STAGE }}
 
       # ── PAT ──────────────────────────────────────────────────────────────
-      - name: Build [pat]
-        if: github.ref_name == 'pat'
-        run: npm run build:pat
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_PAT }}
-
-      - name: Deploy [pat]
+      - name: Build + Deploy [pat]
         if: github.ref_name == 'pat'
         run: |
+          mkdir -p .vercel
+          echo '{"projectId":"${{ secrets.VERCEL_PROJECT_ID_PAT }}","orgId":"${{ secrets.VERCEL_ORG_ID }}"}' > .vercel/project.json
+          npm run build:pat
           vercel build --token=${{ secrets.VERCEL_TOKEN }} --yes
           vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --yes
         env:
@@ -98,16 +82,12 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_PAT }}
 
       # ── PRODUCTION ───────────────────────────────────────────────────────
-      - name: Build [prod]
-        if: github.ref_name == 'main'
-        run: npm run build:prod
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_PROD }}
-
-      - name: Deploy [prod]
+      - name: Build + Deploy [prod]
         if: github.ref_name == 'main'
         run: |
+          mkdir -p .vercel
+          echo '{"projectId":"${{ secrets.VERCEL_PROJECT_ID_PROD }}","orgId":"${{ secrets.VERCEL_ORG_ID }}"}' > .vercel/project.json
+          npm run build:prod
           vercel build --token=${{ secrets.VERCEL_TOKEN }} --yes
           vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
         env:
